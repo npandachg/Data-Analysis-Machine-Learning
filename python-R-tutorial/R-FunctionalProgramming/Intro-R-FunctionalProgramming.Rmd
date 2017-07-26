@@ -1,0 +1,114 @@
+---
+title: "R Notebook"
+output: 
+  html_notebook: 
+    highlight: tango
+    theme: journal
+---
+# Functional Programming in R using purrr library
+
+### map family : applies a function to each element of the data structure map_fam(data, function) returns type of map_fam return type
+```{r}
+library(purrr)
+```
+
+```{r}
+# map_chr
+vec <- c(5,4,3,2,1)
+map_chr(vec, function(x){
+  type <- c("one", "two", "three", "four", "five")
+  type[x]
+})
+```
+
+#### map_if is very common function that takes data, predicate function and a function to be applied to the data according to the predicate and returns a list
+```{r}
+# map_if returns a list, pipe it to unlist
+# note how the function is applied only to even numbers, the rest of the data is left untouched
+vec <- 1:5
+map_if(vec, function(x){
+  x %% 2 == 0
+}, function(y){
+  y^2
+}) %>% unlist()
+```
+#### map_at takes data, an index vector and a function to be applied to the data at the indices provided by the index. Returns a list
+```{r}
+vec <- seq(100, 500, 100)
+index <- c(1, 3, 5)
+map_at(vec, index, function(x){
+  x - 10
+}) %>% unlist()
+```
+
+#### map2 takes two data structure of the same length and applies a function
+```{r}
+map2_chr(letters, 1:26, paste)
+```
+
+#### pmap will take a list of data and apply the function to all the data in the list. data will have to have the same length.
+
+```{r}
+pmap_chr(list(c(1,2,3),
+              c("one", "two", "three"),
+              c("un", "dos", "tres")), 
+         paste)
+
+```
+### reduce family : iteratively combines the first element with the second element according to the function(x,y) with the result becoming the first argument. Reduces the whole data
+```{r}
+# combine a with b, then ab with c, then abc with d.
+reduce(letters[1:4], function(x,y){
+  paste0(x,y)
+})
+```
+```{r}
+# combine d with c, then dc with b, then dcb with a.
+reduce_right(letters[1:4], function(x,y){
+  paste0(x,y)
+})
+```
+### search : contains and detect. contains returns TRUE if a specific element is present in the data.
+```{r}
+contains(letters, "a")
+```
+### detect takes data and a (predicate) function and it returns the first element of the data for which the predicate is true. to get the first index use detect_index.
+```{r}
+detect(20:40, function(x){
+  x > 22 && x %% 2 == 0
+})
+```
+```{r}
+detect_index(20:40, function(x){
+  x > 22 && x %% 2 == 0
+})
+```
+### filter functions : keep, discard, every, some. Take data and a predicate. keep will only keep those elements that satisfy the predicate, discard will remove the elements that satisfy the predicate, every will return TRUE if every element satisfies the predicate and some will return TRUE if atleast one element satisfies the predicate.
+```{r}
+keep(1:20, function(x){
+  x %% 2 == 0
+})
+```
+### compose function combines functions (mathematical composition)
+```{r}
+n_unique <- compose(length, unique)
+# The composition above is the same as:
+# n_unique <- function(x){
+#   length(unique(x))
+# }
+
+rep(1:5, 1:5)
+
+n_unique(rep(1:5, 1:5))
+```
+### partial function : specify some of the arguments of a function to yield a function using partial
+```{r}
+mult_three_n <- function(x, y, z){
+  x * y * z
+}
+
+mult_by_15 <- partial(mult_three_n, x = 3, y = 5)
+
+mult_by_15(z = 4)
+```
+

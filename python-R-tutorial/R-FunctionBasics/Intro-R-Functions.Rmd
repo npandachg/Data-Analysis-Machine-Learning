@@ -1,0 +1,99 @@
+---
+title: "R Notebook"
+output: 
+  html_notebook: 
+    highlight: tango
+    theme: journal
+---
+# Function basics
+
+
+```{r}
+# write a function that checks for dependent packages and downloads it
+check_dependency <- function(){
+  if (!require(dplyr)) {
+    message("Installing dplyr")
+    install.packages("dplyr")
+  }
+  if (!require(readr)) {
+    message("Installing readr")
+    install.packages("readr")
+  }
+}
+
+```
+
+
+```{r}
+#library(dplyr)
+#library(readr)
+
+# check number of downloads of cran package on a given date from cran-logs of rstudio. Default date is Jan 1st 2017
+
+## pkgname: package name (character)
+## date: YYYY-MM-DD (character)
+
+num_download <- function(pkgname, date = "2017-01-01"){
+  check_dependency()
+  # get the year from the date
+  year <- substr(date, 1, 4)
+  # get the file location : "http://cran-logs.rstudio.com/YYYY/YYYY-MM-DD.csv.gz"
+  src <- sprintf("http://cran-logs.rstudio.com/%s/%s.csv.gz", year, date)
+  
+  # construct path for storing local file
+  setwd("~/Data-Analysis-Machine-Learning/")
+  dest <- file.path("data-files/", basename(src))
+  
+  # download the file if it doesn't already exist
+  if(!file.exists(dest)) download.file(src, dest, quiet = TRUE)
+  
+  cran <- read_csv(dest, col_types = "ccicccccci", progress = FALSE)
+        cran %>% filter(package == pkgname) %>% nrow
+}
+```
+
+```{r num_download_filehash, warning=FALSE}
+num_download("filehash", "2017-01-20")
+```
+
+```{r, num_download_ggplot2, warning=FALSE}
+num_download("ggplot2")
+```
+```{r}
+# Vectorize the num_download function to have a vector of arguments in pkgname
+## pkgname: package name (vector of character)
+## date: YYYY-MM-DD (character)
+
+num_download2 <- function(pkgname, date = "2017-01-01"){
+  check_dependency()
+  
+  # check arguments
+  if(!is.character(pkgname)) stop("pkgname should be character(vector) ")
+  if(!is.character(date)) stop("date should be a character")
+  if(length(date) != 1) stop("date should be a single length character")
+  
+  # get the year from the date
+  year <- substr(date, 1, 4)
+  # get the file location : "http://cran-logs.rstudio.com/YYYY/YYYY-MM-DD.csv.gz"
+  src <- sprintf("http://cran-logs.rstudio.com/%s/%s.csv.gz", year, date)
+  
+  # construct path for storing local file
+  setwd("~/Data-Analysis-Machine-Learning/")
+  dest <- file.path("data-files/", basename(src))
+  
+  # download the file if it doesn't already exist
+  if(!file.exists(dest)) download.file(src, dest, quiet = TRUE)
+  
+  cran <- read_csv(dest, col_types = "ccicccccci", progress = FALSE)
+  cran %>% filter(package %in% pkgname) %>% 
+    group_by(package) %>%
+    summarize(number_downloads = n())
+}
+```
+```{r, warning=FALSE}
+num_download2(c("ggplot2", "dplyr"))
+```
+```{r}
+num_download2(10)
+```
+

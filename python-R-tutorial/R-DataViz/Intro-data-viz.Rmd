@@ -1,0 +1,132 @@
+---
+title: "R Notebook"
+output: 
+  html_notebook: 
+    highlight: tango
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+First steps : Data Viz 
+From : http://r4ds.had.co.nz/data-visualisation.html#prerequisites-1
+
+```{r}
+library(ggplot2)
+mpg
+```
+
+The mpg data frame has variables displ (car's engine size in ltrs)
+and hwy (fuel efficiency on highway)
+
+Creating a ggplot
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = cyl, y = hwy))
+```
+
+Adding + creates a layer on the plot. geom_mapping (point, line) etc maps data variables to the plot
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class ))
+```
+To map an aesthetic to a variable, associate the name of the aesthetic to the name of the variable inside aes().
+Mapping an uordered variable like class to color is a good idea. However mapping an unordered variable to size is a bad idea.
+
+```{r}
+class(mpg$class)
+```
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size = class ))
+```
+
+Other options for unordered variables are alpha and shape
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+
+```
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+
+Map same variable to multiple aesthetics
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = displ))
+```
+
+```{r}
+?geom_point
+```
+
+Facets : split variables according to categories (levels) of a categorical variable
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+To facet your plot on the combination of two variables, add facet_grid() to your plot call. The first argument of facet_grid() is also a formula. This time the formula should contain two variable names separated by a ~.
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+```
+Facet with a continuous variable
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ cty)
+```
+
+```{r}
+summary(mpg)
+```
+
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+```
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+```
+
+Smooth mapping using geom_smooth
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+Similar to geom object color in geom_point, we can use linetype in geom_smooth
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+```
+Adding multiple geoms : global an local mapping
+Global mapping to the gggplot function. Any local mapping comes in
+the geom function
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(mapping = aes(color = class)) +
+  geom_smooth()
+```
+
+Some geoms transform the data and produce a statistical transformation. For example geom_bar plots the count of a categorical data. The y variable is the "transformed" variable.
+```{r}
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut))
+```
+```{r}
+?geom_bar
+```
+
